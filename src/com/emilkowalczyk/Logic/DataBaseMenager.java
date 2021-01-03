@@ -1,2 +1,4 @@
-package com.emilkowalczyk.Logic;public class DataBaseMenager {
+package com.emilkowalczyk.Logic;
+
+public class DataBaseMenager {
 }

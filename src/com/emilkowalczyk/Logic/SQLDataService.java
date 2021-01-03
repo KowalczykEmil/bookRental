@@ -1,2 +1,4 @@
-package com.emilkowalczyk.Logic;public class SQLDataService {
+package com.emilkowalczyk.Logic;
+
+public class SQLDataService {
 }
