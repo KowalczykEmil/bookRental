@@ -39,14 +39,14 @@ public class DataBaseMenager  {
 
     public List<Book> getAllBooks() {
         if(!connectStatus) connect();
-        String strSelect = "select b.id, b.title, b.author_id, b.yearOfPublic, b.rented," +
-                " a.id as author_id, a.name, a.last_name from books as b, authors as a;";
+        String strSelect = "select b.id, b.title, b.author_id, b.year_of_public, b.rented," +
+                " a.id as author_id, a.name, a.last_name from books as b, authors as a WHERE b.author_id = a.id ";
         List<Book> books = new ArrayList<>();
         try ( ResultSet rset = stmt.executeQuery(strSelect) )
         {
             while(rset.next()) {
                 String title = rset.getString("title");
-                Integer yearOfPublic = rset.getInt("yearOfPublic");
+                Integer yearOfPublic = rset.getInt("year_of_public");
                 Integer id = rset.getInt("id");
                 String authorName = rset.getString("name");
                 String authorLastName = rset.getString("last_name");
@@ -70,13 +70,14 @@ public class DataBaseMenager  {
         executeQuery(insertQuery);
     }
 
-    public void removeUser(Person person) {
-
+    public void removeUser(String name, String lastName) {
+        String insertQuery = "DELETE FROM users WHERE name = " + name + " AND lastName = " + lastName +";";
+        executeQuery(insertQuery);
     }
 
     public boolean rent(Person person, Integer book_id, LocalDateTime dayOfRent) {
         if(!connectStatus) connect();
-        String strSelect = "select reneted from books where id = " + book_id + ";";
+        String strSelect = "select rented from books where id = " + book_id + ";";
         boolean status = false;
         try ( ResultSet rset = stmt.executeQuery(strSelect) ) {
             while(rset.next()) {

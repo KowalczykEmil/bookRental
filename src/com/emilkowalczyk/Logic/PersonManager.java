@@ -20,6 +20,8 @@ public class PersonManager {
         for(Person user : users) {
             if (user.name.equals(name) && user.lastName.equals(lastName)) {
                 users.remove(user);
+                DataBaseMenager dbm = new DataBaseMenager();
+                dbm.removeUser(name, lastName);
                 break;
             }
         }

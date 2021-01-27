@@ -1,7 +1,10 @@
 package com.emilkowalczyk.Logic;
 
+import javax.sound.midi.Soundbank;
 import javax.xml.crypto.Data;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -10,42 +13,71 @@ public class Interface {
     Scanner scanner = new Scanner(System.in);
     PersonManager pm;
     DataBaseMenager dataBaseMenager = new DataBaseMenager();
+    boolean endStatus = false;
 
     public void showMenu() {
-        setUpPersonManager();
-        System.out.println("Wybierz opcję:\n");
-        System.out.println("1. Wybierz uzytkownika\n");
-        System.out.println("2. Dodaj nowego użytkownika\n");
-        System.out.println("3. Wyswietl wszystkie ksiazki\n");
-        System.out.println("4. Wypozycz ksiazke\n");
+        do {
+            setUpPersonManager();
+            System.out.println("Wybierz opcję:\n");
+            System.out.println("1. Wybierz uzytkownika\n");
+            System.out.println("2. Dodaj nowego użytkownika\n");
+            System.out.println("3. Wyswietl wszystkie ksiazki\n");
+            System.out.println("4. Wypozycz ksiazke\n");
+            System.out.println("5. Usuń użytkownika\n");
 
-        int choice = scanner.nextInt();
+            int choice = Integer.valueOf(scanner.nextLine());
 
-        if (choice == 1) {
-            chooseUser();
+            if (choice == 1) {
+                chooseUser();
+            }
+
+            if(choice == 2) {
+                addUser();
+            }
+
+            if(choice == 3) {
+                displayAllBooks();
+            }
+
+            if (choice == 4) {
+                rentBook();
+            }
+            if (choice == 5) {
+                removeUser();
+            }
         }
-
-        if(choice == 2) {
-            addUser();
-        }
-
-        if(choice == 3) {
-            displayAllBooks();
-        }
-
-        if (choice == 4) {
-            rentBook();
-        }
+        while (!endStatus);
     }
 
     private void setUpPersonManager() {
         pm = new PersonManager();
     }
 
+    private void removeUser(){
+        System.out.println("Podaj dane użytkownika, którego chcesz usunąć");
+        System.out.println("Imię: ");
+        String name = scanner.nextLine();
+        System.out.println("Nazwisko: ");
+        String lastName = scanner.nextLine();
+
+        pm.removePerson(name, lastName);
+    }
     private void addUser() {
         System.out.println("Podaj dane nowego uzytkownika:");
         System.out.println("Imie:");
-        String name = scanner.nextLine();
+        boolean status = false;
+        String name = "";
+        do {
+            try{
+                name = scanner.nextLine();
+                status = true;
+            }
+            catch(java.util.InputMismatchException ex) {
+                System.out.println("Podałeś złą wartość.");
+                ex.printStackTrace();
+            }
+        }
+        while (!status);
 
         System.out.println("Nazwisko:");
         String lastName = scanner.nextLine();
@@ -96,7 +128,7 @@ public class Interface {
             String status;
             if(rented) status = "TAK";
             else status = "NIE";
-            System.out.println(book.getId() + ". tytul: " + book.getTitle() + ", data wydania: " + book.getYearOfPublic() + ", wypozyczona: "
+            System.out.println(book.getId() + ". tytul: " +  book.getTitle() + ", autor: " + book.getAuthor() +", data wydania: " + book.getYearOfPublic() + ", wypozyczona: "
                     + status);
         }
         System.out.println("Liczba wszystkcich ksiazek = " + books.size());
