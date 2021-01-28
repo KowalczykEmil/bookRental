@@ -29,5 +29,7 @@ public class Main {
 
         Interface i = new Interface();
         i.showMenu();
+
+        //Próba przesłania - ze wzgledu na błąd githuba.
     }
 }
