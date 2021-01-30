@@ -14,7 +14,8 @@ public class Person {
 
     public ArrayList<Book> books = new ArrayList<>();
 
-    public Person(String name, String lastName, int dayOfBirth, int monthOfBirth, int yearOfBirth, String email, String phoneNumber) {
+    public Person(Integer id, String name, String lastName, int dayOfBirth, int monthOfBirth, int yearOfBirth, String email, String phoneNumber) {
+        this.id = id;
         this.name = name;
         this.lastName = lastName;
         this.dayOfBirth = dayOfBirth;

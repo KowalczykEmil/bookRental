@@ -2,11 +2,9 @@ package com.emilkowalczyk.Logic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class PersonManager {
-    Interface interf = new Interface();
-    Person currentPerson;
+    public Person currentPerson;
     DataBaseMenager dbm = new DataBaseMenager();
     List<Person> users = new ArrayList<>();
 

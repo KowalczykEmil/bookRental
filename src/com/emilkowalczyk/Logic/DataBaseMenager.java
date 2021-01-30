@@ -1,9 +1,7 @@
 package com.emilkowalczyk.Logic;
-import javax.xml.crypto.Data;
-import javax.xml.transform.Result;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DataBaseMenager  {
@@ -35,6 +33,33 @@ public class DataBaseMenager  {
         catch(SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public Book getBook(Integer id) {
+        if(!connectStatus) connect();
+        String strSelect = "select b.id, b.title, b.author_id, b.year_of_public, b.rented," +
+                " a.id as author_id, a.name, a.last_name from books as b, authors as a, rents as r WHERE b.author_id = a.id " +
+                "AND r.book_id = b.id AND b.id = " + id;
+
+        Book book = null;
+        try ( ResultSet rset = stmt.executeQuery(strSelect) )
+        {
+            while(rset.next()) {
+                String title = rset.getString("title");
+                Integer yearOfPublic = rset.getInt("year_of_public");
+                Integer book_id = rset.getInt("id");
+                String authorName = rset.getString("name");
+                String authorLastName = rset.getString("last_name");
+                Integer authorId = rset.getInt("author_id");
+                boolean rented = rset.getBoolean("rented");
+
+                book = new Book(title, yearOfPublic, book_id, authorName, authorLastName, authorId, rented);
+            }
+        }
+        catch(SQLException ex) {
+            ex.printStackTrace();
+        }
+        return book;
     }
 
     public List<Book> getAllBooks() {
@@ -75,9 +100,50 @@ public class DataBaseMenager  {
         executeQuery(insertQuery);
     }
 
-    public boolean rent(Person person, Integer book_id, LocalDateTime dayOfRent) {
+    public List<Person> getAllUsers() {
         if(!connectStatus) connect();
-        String strSelect = "select rented from books where id = " + book_id + ";";
+        String selectQuery = "select * from users";
+        List<Person> users = new ArrayList<>();
+        try ( ResultSet rset = stmt.executeQuery(selectQuery) )
+        {
+            while(rset.next()) {
+                Integer user_id = rset.getInt("id");
+                String name = rset.getString("name");
+                // zmienic to na normalny typ Date w bazie i w Person :)
+                String lastName = rset.getString("lastName");
+                Integer dayOfBirth = rset.getInt("dayOfBirth");
+                Integer monthOfBirth = rset.getInt("monthOfBirth");
+                Integer yearOfBirth = rset.getInt("yearOfBirth");
+                String email = rset.getString("email");
+                String phoneNumber = rset.getString("phoneNumber");
+                Person newPerson = new Person(user_id, name, lastName, dayOfBirth, monthOfBirth, yearOfBirth, email, phoneNumber);
+
+                users.add(newPerson);
+            }
+        }
+        catch(SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return users;
+    }
+
+    public boolean rent(Person person, Integer book_id, Integer borrowingPeriod) {
+        if(!connectStatus) connect();
+        boolean status = getRentStatus(book_id);
+        if(!status) {
+            String insertQuery = "INSERT INTO rents VALUES (NULL, " + person.getId() + ", " + book_id
+                    + ", now(), " + " DATE_ADD(now(), INTERVAL " + borrowingPeriod + " DAY));";
+            executeQuery(insertQuery);
+            String updateQuery = "UPDATE books SET rented = TRUE WHERE id = " + book_id + ";";
+            executeQuery(updateQuery);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean getRentStatus(Integer id) {
+        String strSelect = "SELECT rented FROM books WHERE id = " + id + ";";
         boolean status = false;
         try ( ResultSet rset = stmt.executeQuery(strSelect) ) {
             while(rset.next()) {
@@ -88,13 +154,52 @@ public class DataBaseMenager  {
         catch(SQLException ex) {
             ex.printStackTrace();
         }
-        if(!status) {
-            String insertQuery = "insert into rents values (NULL, " + person.getId() + ", " + book_id + "TO_DATE('"
-                    + dayOfRent + "', 'DD/MM/YYYY'), (SELECT DATEADD(week, 2, '"+  dayOfRent + "2017/08/25'));";
-            executeQuery(insertQuery);
-            return true;
+        return status;
+    }
+
+    public List<Rent> getAllRents() {
+        if(!connectStatus) connect();
+        String strSelect = "SELECT * FROM rents;";
+        List<Rent> rents = new ArrayList<>();
+        try ( ResultSet rset = stmt.executeQuery(strSelect) )
+        {
+            while(rset.next()) {
+                Integer id = rset.getInt("id");
+                Integer book_id = rset.getInt("book_id");
+                Integer user_id = rset.getInt("user_id");
+                Date date_of_rent = rset.getDate("date_of_rent");
+                Date date_of_return = rset.getDate("date_of_return");
+
+                Rent newRent = new Rent(id, book_id, user_id, date_of_rent, date_of_return);
+                rents.add(newRent);
+            }
         }
-        return false;
+        catch(SQLException ex) {
+            ex.printStackTrace();
+        }
+        return rents;
+    }
+
+    public Rent getRentInfo(Integer book_id) {
+        if(!connectStatus) connect();
+        String selectQuery = "select * from rents where book_id = " + book_id + ";";
+        Rent rent = null;
+        try ( ResultSet rset = stmt.executeQuery(selectQuery) )
+        {
+            while(rset.next()) {
+                Integer id = rset.getInt("id");
+                Integer book_Id_To_Fetch = rset.getInt("book_id");
+                Integer user_id = rset.getInt("user_id");
+                Date date_of_rent = rset.getDate("date_of_rent");
+                Date date_of_return = rset.getDate("date_of_return");
+                rent = new Rent(id, book_Id_To_Fetch, user_id, date_of_rent, date_of_return );
+            }
+        }
+        catch(SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return rent;
     }
 
     public Person getUserById(Integer id) {
@@ -104,6 +209,7 @@ public class DataBaseMenager  {
         try ( ResultSet rset = stmt.executeQuery(selectQuery) )
         {
             while(rset.next()) {
+                Integer user_id = rset.getInt("id");
                 String name = rset.getString("name");
                 // zmienic to na normalny typ Date w bazie i w Person :)
                 String lastName = rset.getString("lastName");
@@ -112,7 +218,7 @@ public class DataBaseMenager  {
                 Integer yearOfBirth = rset.getInt("yearOfBirth");
                 String email = rset.getString("email");
                 String phoneNumber = rset.getString("phoneNumber");
-                person = new Person(name, lastName, dayOfBirth, monthOfBirth, yearOfBirth, email, phoneNumber);
+                person = new Person(user_id, name, lastName, dayOfBirth, monthOfBirth, yearOfBirth, email, phoneNumber);
             }
         }
         catch(SQLException ex) {
@@ -120,6 +226,44 @@ public class DataBaseMenager  {
         }
 
         return person;
+    }
+
+    public List<Book> getRentedBooks(Integer user_id) {
+        if(!connectStatus) connect();
+        String strSelect = "select b.id, b.title, b.author_id, b.year_of_public, b.rented," +
+                "a.name, a.last_name from books as b, authors as a, rents as r, users as u " +
+                "WHERE b.author_id = a.id AND r.user_id = u.id AND r.book_id = b.id AND u.id = " + user_id +";";
+        List<Book> books = new ArrayList<>();
+        try ( ResultSet rset = stmt.executeQuery(strSelect) )
+        {
+            while(rset.next()) {
+                String title = rset.getString("title");
+                Integer yearOfPublic = rset.getInt("year_of_public");
+                Integer id = rset.getInt("id");
+                String authorName = rset.getString("name");
+                String authorLastName = rset.getString("last_name");
+                Integer authorId = rset.getInt("author_id");
+                boolean rented = rset.getBoolean("rented");
+
+                Book newBook = new Book(title, yearOfPublic, id, authorName, authorLastName, authorId, rented);
+                books.add(newBook);
+            }
+        }
+        catch(SQLException ex) {
+            ex.printStackTrace();
+        }
+        return books;
+    }
+
+    public boolean returnBook(Integer id) {
+        if(getRentStatus(id)) {
+            String deleteQuery = "DELETE FROM rents WHERE book_id = " + id + ";";
+            executeQuery(deleteQuery);
+            String updateQuery = "UPDATE books SET rented = FALSE WHERE id = " + id + ";";
+            executeQuery(updateQuery);
+            return true;
+        }
+        return false;
     }
 
 
