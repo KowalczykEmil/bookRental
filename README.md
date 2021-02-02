@@ -20,3 +20,4 @@ Todo in the future:
 -Managing exceptions
 -Displaying information about rentals using the calendar
 
+![BookRental](https://user-images.githubusercontent.com/73130450/106633696-58343300-657f-11eb-8aa5-c52da5f46aee.png)
