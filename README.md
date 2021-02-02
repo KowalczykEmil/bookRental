@@ -1,5 +1,5 @@
 # Book_Rental
-Application written in Java, used JDBC to connect with MySQL and Swing/AWT to make GUI. 
+Application written in Java, used JDBC to connect with MySQL and Swing to make GUI. 
 The application can be used from the console and GUI.
 
 Features included in the application:
