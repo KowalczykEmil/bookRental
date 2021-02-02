@@ -3,4 +3,7 @@
 	<output-test url="file://$MODULE_DIR$/out/test/Book_Rental"/>
 	<exclude-output/>
 	<contentEntry url="file://$MODULE_DIR$"/>
+	<levels>
+		<level name="mysql-connector-java-8.0.23" value="project"/>
+	</levels>
 </component>

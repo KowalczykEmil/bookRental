@@ -16,21 +16,22 @@ public class Main {
         // rsonManager personManager = new PersonManager();
         // personManager.addNewPerson(Emil);
 
-        // Może tutaj jakiś plik wykonywalny?
         /*String commandPath = "cd E:\\Book_Rental\\mysql\\mysql-8.0.23-winx64\\bin";
         String commandMySQL = "mysqld";
         try
         {
             Process process1 = Runtime.getRuntime().exec(commandPath);
-            Process process2 = Runtime.getRuntime().exec(commandMySQL);
-        }
         catch (IOException e)
         {
             e.printStackTrace();
         }
         */
 
-        Interface i = new Interface();
-        i.showMenu();
+
+         Interface i = new Interface();
+         i.showGUI();
+         //i.showMenu();
+
+
     }
 }

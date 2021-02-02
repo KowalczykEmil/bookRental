@@ -176,3 +176,11 @@
 2021-01-29T02:52:22.003527Z 0 [ERROR] [MY-010020] [Server] Data Dictionary initialization failed.
 2021-01-29T02:52:22.003937Z 0 [ERROR] [MY-010119] [Server] Aborting
 2021-01-29T02:52:22.004573Z 0 [System] [MY-010910] [Server] E:\Book_Rental\mysql\mysql-8.0.23-winx64\bin\mysqld.exe: Shutdown complete (mysqld 8.0.23)  MySQL Community Server - GPL.
+2021-01-31T15:52:52.612821Z 0 [System] [MY-010116] [Server] E:\Book_Rental\mysql\mysql-8.0.23-winx64\bin\mysqld.exe (mysqld 8.0.23) starting as process 9660
+2021-01-31T15:52:52.630768Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+2021-01-31T15:52:52.631593Z 1 [ERROR] [MY-012271] [InnoDB] The innodb_system data file 'ibdata1' must be writable
+2021-01-31T15:52:52.632016Z 1 [ERROR] [MY-012278] [InnoDB] The innodb_system data file 'ibdata1' must be writable
+2021-01-31T15:52:52.632450Z 1 [ERROR] [MY-010334] [Server] Failed to initialize DD Storage Engine
+2021-01-31T15:52:52.632940Z 0 [ERROR] [MY-010020] [Server] Data Dictionary initialization failed.
+2021-01-31T15:52:52.633335Z 0 [ERROR] [MY-010119] [Server] Aborting
+2021-01-31T15:52:52.634006Z 0 [System] [MY-010910] [Server] E:\Book_Rental\mysql\mysql-8.0.23-winx64\bin\mysqld.exe: Shutdown complete (mysqld 8.0.23)  MySQL Community Server - GPL.

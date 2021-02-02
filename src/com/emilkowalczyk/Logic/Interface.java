@@ -2,12 +2,10 @@ package com.emilkowalczyk.Logic;
 
 import com.emilkowalczyk.GUI.GUI;
 
-import javax.sound.midi.Soundbank;
 import javax.swing.*;
-import javax.xml.crypto.Data;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.awt.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,9 +19,9 @@ public class Interface {
     boolean loginStatus = false;
 
     public void showMenu() {
+        System.out.println("Witaj w naszej bibliotece! =) \n");
         do {
             if(!loginStatus) setUpPersonManager();
-            System.out.println("Witaj w naszej bibliotece! =) \n");
             System.out.println("Wybierz opcję:");
             System.out.println("1. Wybór uzytkownika");
             System.out.println("2. Nowy użytkownik");
@@ -48,8 +46,8 @@ public class Interface {
                     System.out.println("Liczba wszystkich ksiazek: " + numberOfBooks);
                 }
                 case 4 -> rentBook();
-                case 5 -> showRents();
-                case 6 -> showRentedBooks();
+                case 5 -> showRents(); // wszystkie książki, które sa wypozczyone
+                case 6 -> showRentedBooks(); // pokazuje ksiazki wypozyczone przez danego uzytkownika
                 case 7 -> returnBook();
                 case 8 -> showGUI();
                 case 9 -> showUsers();
@@ -115,12 +113,14 @@ public class Interface {
     }
 
     private void showRents() {
+        System.out.println("Książki wypożyczone z naszej biblioteki: ");
         List<Rent> rents = dataBaseMenager.getAllRents();
         for(Rent rent : rents) {
-            Book book = getBookById(rent.getBook_id());
+            Book book = dataBaseMenager.getBook(rent.getBook_id());
 
             System.out.println("Tytul: " + book.getTitle() + ", UserID: " +rent.getUser_id() + ", data zwrotu: " + rent.getDate_of_return());
         }
+        System.out.println("");
     }
 
     private void chooseUser() {
@@ -130,7 +130,10 @@ public class Interface {
         if(pm.currentPerson == null) {
             System.out.println("Wystapil blad podczas wczytywania uzytkownika");
         }
-        System.out.println("Użytkownik: " + pm.currentPerson.getName() + " " + pm.currentPerson.getLastName());
+        else {
+            System.out.println("Użytkownik: " + pm.currentPerson.getName() + " " + pm.currentPerson.getLastName());
+            showAnnouncement(); // pokazuje czy zbliza sie termin zwrotu
+        }
     }
 
     private Integer displayAllBooks() {
@@ -147,11 +150,6 @@ public class Interface {
         return books.size();
     }
 
-    private Book getBookById(Integer id) {
-        Book book = dataBaseMenager.getBook(id);
-        return book;
-    }
-
     private void rentBook() {
         checkLogin();
 
@@ -161,18 +159,23 @@ public class Interface {
 
         Integer id = Integer.valueOf(scanner.nextLine());
 
-        RentManager rm = new RentManager();
-        boolean status = rm.rent(pm.currentPerson, id);
-
-        Rent rent = dataBaseMenager.getRentInfo(id);
-        String dateOfReturn = rent.getDate_of_return();
-
-        if(!status) {
-            System.out.println("Wybrana książka jest wypożyczona do " + dateOfReturn + "!\n");
-            Book book = getBookById(id);
+        if(dataBaseMenager.getBookById(id) == null) {
+            System.out.println("Książka o podanym ID nie istnieje.");
         }
         else {
-            System.out.println("Wypożyczenie zostało zarejestrowane. Data zwrotu: " + dateOfReturn + ".\n");
+            RentManager rm = new RentManager();
+            boolean status = rm.rent(pm.currentPerson, id);
+
+            Rent rent = dataBaseMenager.getRentInfo(id);
+            String dateOfReturn = rent.getDate_of_return();
+
+            if(!status) {
+                System.out.println("Wybrana książka jest wypożyczona do " + dateOfReturn + "!\n");
+                Book book = dataBaseMenager.getBook(rent.getBook_id()); // po co to jest?
+            }
+            else {
+                System.out.println("Wypożyczenie zostało zarejestrowane. Data zwrotu: " + dateOfReturn + ".\n");
+            }
         }
     }
 
@@ -197,6 +200,7 @@ public class Interface {
                         "Data zwrotu: " + rent.getDate_of_return() + "\n");
             }
         }
+
     }
 
     private void returnBook() {
@@ -220,17 +224,62 @@ public class Interface {
         }
     }
 
-    void showGUI(){
+    public void showGUI(){
         GUI gui = new GUI();
         gui.setVisible(true);
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     void showUsers() {
-            List<Person> users = dataBaseMenager.getAllUsers();
-            for(Person user : users) {
-                System.out.println(user.getId() + ". " + user.getName() + " " + user.getLastName());
+        List<Person> users = dataBaseMenager.getAllUsers();
+        for(Person user : users) {
+            System.out.println(user.getId() + ". " + user.getName() + " " + user.getLastName());
+        }
+    }
+
+    private void showAnnouncement() {
+        List<Book> books = pm.checkUserRents(pm.currentPerson.getId());
+
+        if(books!=null  && !books.isEmpty()) {
+            List<Integer> toReturn = new ArrayList<>();
+            Date date = java.util.Calendar.getInstance().getTime();
+
+            for(Book book : books) {
+                Rent rent = dataBaseMenager.getRentInfo(book.getId());
+                Date d2 = null;
+                try {
+                    d2 = new SimpleDateFormat("dd-MM-yyyy").parse(rent.getDate_of_return());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                long diff = (d2.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+                // d2 - data zwrotu
+                // date - aktualna data pobierana z systemu
+
+                if(diff <= 12) {
+                    toReturn.add(rent.getBook_id());
+                }
             }
+
+            if(!toReturn.isEmpty()) {
+                final Runnable runnable =
+                        (Runnable) Toolkit.getDefaultToolkit().getDesktopProperty("win.sound.exclamation");
+                if (runnable != null) runnable.run();
+
+                System.out.println("\n****************** UWAGA ********************\n");
+
+                System.out.println("Książki, które należy wkrótce zwrócić: \n");
+                for (Integer bookId : toReturn) {
+                    Book book = dataBaseMenager.getBook(bookId);
+                    Rent rent = dataBaseMenager.getRentInfo(book.getId());
+                    System.out.println(book.getId() + ". \t=== " + book.getTitle() + "=== \n\t" +
+                            "Autor: " + book.getAuthor() + "\n\t" +
+                            "Data zwrotu: " + rent.getDate_of_return() + "\n");
+                }
+                System.out.println("*********************************************\n");
+            }
+        }
     }
 
     private void exit() {

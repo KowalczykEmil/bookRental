@@ -14,8 +14,8 @@ public class DataBaseMenager  {
     public void connect() {
         try{
             conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/bookrental?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
-                "root", "Haslo123");
+                    "jdbc:mysql://localhost:3306/bookrental?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
+                    "root", "Haslo123");
 
             stmt = conn.createStatement();
         }
@@ -26,7 +26,7 @@ public class DataBaseMenager  {
 
     private void executeQuery(String query) {
         if(!connectStatus) connect();
-        System.out.println(query);
+        // System.out.println(query);
         try{
             stmt.executeUpdate(query);
         }
@@ -35,7 +35,32 @@ public class DataBaseMenager  {
         }
     }
 
-    public Book getBook(Integer id) {
+    public Book getBookById(Integer id) { // ta funkcja pobiera ksiazke z books
+        if(!connectStatus) connect();
+        String strSelect = "SELECT * FROM books AS b, authors AS a WHERE b.author_id = a.id AND b.id = " + id;
+
+        Book book = null;
+        try ( ResultSet rset = stmt.executeQuery(strSelect) )
+        {
+            while(rset.next()) {
+                String title = rset.getString("title");
+                Integer yearOfPublic = rset.getInt("year_of_public");
+                Integer book_id = rset.getInt("id");
+                String authorName = rset.getString("name");
+                String authorLastName = rset.getString("last_name");
+                Integer authorId = rset.getInt("author_id");
+                boolean rented = rset.getBoolean("rented");
+
+                book = new Book(title, yearOfPublic, book_id, authorName, authorLastName, authorId, rented);
+            }
+        }
+        catch(SQLException ex) {
+            ex.printStackTrace();
+        }
+        return book;
+    }
+
+    public Book getBook(Integer id) { // ta funkcja pobiera ksiazke, jesli jest wypozyczona
         if(!connectStatus) connect();
         String strSelect = "select b.id, b.title, b.author_id, b.year_of_public, b.rented," +
                 " a.id as author_id, a.name, a.last_name from books as b, authors as a, rents as r WHERE b.author_id = a.id " +
@@ -143,6 +168,7 @@ public class DataBaseMenager  {
     }
 
     private boolean getRentStatus(Integer id) {
+        if(!connectStatus) connect();
         String strSelect = "SELECT rented FROM books WHERE id = " + id + ";";
         boolean status = false;
         try ( ResultSet rset = stmt.executeQuery(strSelect) ) {
@@ -265,8 +291,4 @@ public class DataBaseMenager  {
         }
         return false;
     }
-
-
-
-
 }

@@ -1,6 +1,9 @@
 package com.emilkowalczyk.Logic;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class PersonManager {
@@ -29,12 +32,41 @@ public class PersonManager {
         currentPerson = dbm.getUserById(id);
     }
 
-    public void logout() {
-
+    public List<Book> checkUserRents(Integer id) {
+        List<Book> books = dbm.getRentedBooks(id);
+        if(!books.isEmpty()) {
+            return books;
+        }
+        return null;
     }
 
+    public List<Integer> getBooksToReturnShortly() {
+        List<Book> books = checkUserRents(currentPerson.getId());
+        List<Integer> toReturn = null;
 
+        if (books != null) {
+            toReturn = new ArrayList<>();
+            Date date = java.util.Calendar.getInstance().getTime();
 
+            for (Book book : books) {
+                Rent rent = dbm.getRentInfo(book.getId());
+                Date d2 = null;
+                try {
+                    d2 = new SimpleDateFormat("dd-MM-yyyy").parse(rent.getDate_of_return());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
+                long diff = (d2.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+                // d2 - data zwrotu
+                // date - aktualna data pobierana z systemu
 
+                if (diff <= 15) {
+                    toReturn.add(rent.getBook_id());
+                }
+            }
+        }
+
+        return toReturn;
+    }
 }
