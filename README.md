@@ -2,7 +2,7 @@
 Application written in Java, used JDBC to connect with MySQL and Swing to make GUI. 
 The application can be used from the console and GUI.
 
-Features included in the application:
+## Features included in the application:
 1. Adding readers
 2. Choosing a current user/reader. 
 3. Displaying books downloaded from a MySQL table
