@@ -1,4 +1,4 @@
-# Book_Rental
+# bookRental
 Application written in Java, used JDBC to connect with MySQL and Swing to make GUI. 
 The application can be used from the console and GUI.
 
